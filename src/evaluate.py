@@ -28,6 +28,7 @@ from langchain import hub
 from langchain_core.prompts import ChatPromptTemplate
 from utils import check_env_vars, format_score, print_section_header, get_llm as get_configured_llm
 from metrics import evaluate_f1_score, evaluate_clarity, evaluate_precision
+import time
 
 load_dotenv()
 
@@ -150,7 +151,7 @@ def evaluate_prompt_on_example(
         outputs = example.outputs if hasattr(example, 'outputs') else {}
 
         chain = prompt_template | llm
-
+        
         response = chain.invoke(inputs)
         answer = response.content
 
@@ -200,6 +201,10 @@ def evaluate_prompt(
         print("   Avaliando exemplos...")
 
         for i, example in enumerate(examples, 1):
+            bug = example.inputs.get("bug_report", "")
+            titulo = bug.split("\n")[0]
+
+            print(f"\n[{i}/{len(examples)}] {titulo}")
             result = evaluate_prompt_on_example(prompt_template, example, llm)
 
             if result["answer"]:
